@@ -1,5 +1,7 @@
 package co.com.alianza.clientes.services.impl;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -30,20 +32,35 @@ public class ClienteServicesImpl implements ClienteServices {
 		List<Cliente> clients = new ArrayList<>();
 		if (cliente == null)
 			clientRepository.findAll().forEach(clients::add);
-		else
-			clientRepository.findByBussinessIdOrPhoneOrEmailOrStartDateOrEndDate(cliente.getBussinessId(),
-					cliente.getPhone(), cliente.getEmail(), cliente.getStartDate(), cliente.getEndDate())
+		else {
+			if (cliente.getPhone() < 1)
+				cliente.setPhone(null);
+			if (cliente.getBussinessId() != null && cliente.getBussinessId().isBlank())
+				cliente.setBussinessId(null);
+			if (cliente.getEmail()!= null && cliente.getEmail().isBlank())
+				cliente.setEmail(null);
+			clientRepository
+					.findByBussinessIdContainingIgnoreCaseOrPhoneOrEmailContainingIgnoreCaseOrStartDateOrEndDate(
+							cliente.getBussinessId(), cliente.getPhone(), cliente.getEmail(), cliente.getStartDate(),
+							cliente.getEndDate())
 					.forEach(clients::add);
+		}
 		return clients;
 	}
 
 	@Override
-	public Cliente getClienteBySharedKey(String sharedkey) {
+	public Optional<Cliente> getClienteById(long id) {
+		return clientRepository.findById(id);
+	}
+
+	@Override
+	public List<Cliente> getClienteBySharedKey(String sharedkey) {
 		return clientRepository.findBySharedKey(sharedkey);
 	}
 
 	@Override
 	public Cliente createCliente(Cliente cliente) {
+		cliente.setCreationDate(LocalDate.now());
 		Cliente resultCliente = clientRepository
 				.save(new Cliente(cliente.getSharedKey(), cliente.getBussinessId(), cliente.getEmail(),
 						cliente.getPhone(), cliente.getStartDate(), cliente.getEndDate(), cliente.getCreationDate()));
@@ -54,16 +71,15 @@ public class ClienteServicesImpl implements ClienteServices {
 	@Override
 	public Optional<Cliente> updateCliente(long id, Cliente cliente) {
 		Optional<Cliente> clientData = clientRepository.findById(id);
-		if (clientData.isEmpty()) {
-			log.info("No se pudo modificar cliente no se encontró el registro : {}", id);
-			return clientData;
+		if (!clientData.isEmpty()) {
+			Cliente modifCliente = Cliente.builder().id(clientData.get().getId()).sharedKey(cliente.getSharedKey())
+					.bussinessId(cliente.getBussinessId()).email(cliente.getEmail()).phone(cliente.getPhone())
+					.startDate(cliente.getStartDate()).endDate(cliente.getEndDate())
+					.creationDate(cliente.getCreationDate()).build();
+			log.info("Se va a modificar el registro : {}", clientData.get().toString());
+			return Optional.of(clientRepository.save(modifCliente));
 		}
-		Cliente modifCliente = Cliente.builder().id(clientData.get().getId()).sharedKey(cliente.getSharedKey())
-				.bussinessId(cliente.getBussinessId()).email(cliente.getEmail()).phone(cliente.getPhone())
-				.startDate(cliente.getStartDate()).endDate(cliente.getEndDate()).creationDate(cliente.getCreationDate())
-				.build();
-		log.info("Se va a modificar el registro : {}", clientData.get().toString());
-		return Optional.of(clientRepository.save(modifCliente));
+		return clientData;
 	}
 
 	@Override

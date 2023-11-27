@@ -30,7 +30,7 @@ import lombok.ToString;
 @ToString
 @Entity
 @Table(name = "cliente")
-@SequenceGenerator(name="cliente_id_seq", initialValue = 9, allocationSize = 100)
+@SequenceGenerator(name="cliente_id_seq", initialValue = 10, allocationSize = 100)
 public class Cliente {
 
 	@Id

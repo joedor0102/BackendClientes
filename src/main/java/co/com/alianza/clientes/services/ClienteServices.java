@@ -15,12 +15,14 @@ public interface ClienteServices {
 
 	List<Cliente> getClientes(Cliente cliente);
 
-	Cliente getClienteBySharedKey(String sharedkey);
+	List<Cliente> getClienteBySharedKey(String sharedkey);
 
 	Cliente createCliente(Cliente cliente);
 
 	void deleteCliente(long id);
 
 	Optional<Cliente> updateCliente(long id, Cliente cliente);
+
+	Optional<Cliente> getClienteById(long id);
 
 }

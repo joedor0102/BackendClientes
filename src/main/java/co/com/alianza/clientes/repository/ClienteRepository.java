@@ -15,9 +15,9 @@ import co.com.alianza.clientes.model.Cliente;
  */
 public interface ClienteRepository extends JpaRepository<Cliente, Long> {
 
-	Cliente findBySharedKey(String sharedKey);
+	List<Cliente> findBySharedKey(String sharedKey);
 
-	List<Cliente> findByBussinessIdOrPhoneOrEmailOrStartDateOrEndDate(String bussinessId, Long phone, String email,
+	List<Cliente> findByBussinessIdContainingIgnoreCaseOrPhoneOrEmailContainingIgnoreCaseOrStartDateOrEndDate(String bussinessId, Long phone, String email,
 			LocalDate startDate, LocalDate endDate);
 
 }

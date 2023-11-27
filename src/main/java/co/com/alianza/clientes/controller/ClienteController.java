@@ -34,22 +34,41 @@ public class ClienteController {
 	ClienteServices clienteServices;
 
 	@GetMapping("/clientes")
-	public ResponseEntity<List<Cliente>> getClientes(@RequestBody(required = false) Cliente cliente) {
-		Optional<List<Cliente>> clients = Optional.ofNullable(clienteServices.getClientes(cliente));
+	public ResponseEntity<List<Cliente>> getClientes() {
+		Optional<List<Cliente>> clients = Optional.ofNullable(clienteServices.getClientes(null));
 		if (!clients.isEmpty() && !clients.get().isEmpty()) {
 			return new ResponseEntity<>(clients.get(), HttpStatus.OK);
 		}
 		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	}
 
-	@GetMapping("/clientes/{sharedkey}")
-	public ResponseEntity<Cliente> getClienteBySharedKey(@PathVariable("sharedkey") String sharedkey) {
-		Optional<Cliente> clientsData = Optional.ofNullable(clienteServices.getClienteBySharedKey(sharedkey));
+	@GetMapping("/clientes/id/{id}")
+	public ResponseEntity<Cliente> getClienteById(@PathVariable("id") long id) {
+		Optional<Cliente> clientsData = clienteServices.getClienteById(id);
 		if (clientsData.isPresent()) {
 			return new ResponseEntity<>(clientsData.get(), HttpStatus.OK);
 		} else {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
+	}
+
+	@GetMapping("/clientes/sharedkey/{sharedkey}")
+	public ResponseEntity<List<Cliente>> getClienteBySharedKey(@PathVariable("sharedkey") String sharedkey) {
+		Optional<List<Cliente>> clientsData = Optional.ofNullable(clienteServices.getClienteBySharedKey(sharedkey));
+		if (clientsData.isPresent() && clientsData.get().isEmpty())
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		else
+			return new ResponseEntity<>(clientsData.get(), HttpStatus.OK);
+
+	}
+
+	@PostMapping("/clientes/advancesearch")
+	public ResponseEntity<List<Cliente>> getClientesAdvanceSearch(@RequestBody Cliente cliente) {
+		Optional<List<Cliente>> clients = Optional.ofNullable(clienteServices.getClientes(cliente));
+		if (!clients.isEmpty() && !clients.get().isEmpty()) {
+			return new ResponseEntity<>(clients.get(), HttpStatus.OK);
+		}
+		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	}
 
 	@PostMapping("/clientes")

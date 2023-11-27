@@ -83,7 +83,7 @@ class TestClienteController {
 		this.cliente.setStartDate(LocalDate.parse("2019-05-01"));
 		this.cliente.setEndDate(LocalDate.parse("2019-06-30"));
 		this.cliente.setCreationDate(LocalDate.parse("2019-05-20"));
-		this.listCliente = new ArrayList();
+		this.listCliente = new ArrayList<Cliente>();
 		this.listCliente.add(this.cliente);
 		this.mvc = MockMvcBuilders.webAppContextSetup(this.webApplicationContext).build();
 		Mockito.when(clienteServices.getClientes(this.cliente)).thenReturn(listCliente);
@@ -110,7 +110,7 @@ class TestClienteController {
 		this.mapper.registerModule(new JavaTimeModule());
 		this.mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 		final var mvcResult = this.mvc
-				.perform(get(PATH).contentType(MediaType.APPLICATION_FORM_URLENCODED)
+				.perform(post(PATH + "/advancesearch").contentType(MediaType.APPLICATION_FORM_URLENCODED)
 						.content(this.mapper.writeValueAsString(this.cliente))
 						.contentType(MediaType.APPLICATION_JSON_VALUE).accept(MediaType.APPLICATION_JSON_VALUE))
 				.andReturn();
@@ -126,8 +126,8 @@ class TestClienteController {
 	@Test
 	@Order(3)
 	void testGetClienteBySharedKey() throws Exception {
-		final var mvcResult = this.mvc.perform(get(PATH + "/jgutierrez").contentType(MediaType.APPLICATION_JSON_VALUE)
-				.accept(MediaType.APPLICATION_JSON_VALUE)).andReturn();
+		final var mvcResult = this.mvc.perform(get(PATH + "/sharedkey/jgutierrez")
+				.contentType(MediaType.APPLICATION_JSON_VALUE).accept(MediaType.APPLICATION_JSON_VALUE)).andReturn();
 		final var status = mvcResult.getResponse().getStatus();
 		Assert.assertEquals(200, status);
 	}
@@ -135,14 +135,32 @@ class TestClienteController {
 	@Test
 	@Order(4)
 	void testGetClienteBySharedKeyNotFound() throws Exception {
-		final var mvcResult = this.mvc.perform(get(PATH + "/john").contentType(MediaType.APPLICATION_JSON_VALUE)
-				.accept(MediaType.APPLICATION_JSON_VALUE)).andReturn();
+		final var mvcResult = this.mvc.perform(get(PATH + "/sharedkey/john")
+				.contentType(MediaType.APPLICATION_JSON_VALUE).accept(MediaType.APPLICATION_JSON_VALUE)).andReturn();
 		final var status = mvcResult.getResponse().getStatus();
 		Assert.assertEquals(404, status);
 	}
 
 	@Test
 	@Order(5)
+	void testGetClienteById() throws Exception {
+		final var mvcResult = this.mvc.perform(get(PATH + "/id/1").contentType(MediaType.APPLICATION_JSON_VALUE)
+				.accept(MediaType.APPLICATION_JSON_VALUE)).andReturn();
+		final var status = mvcResult.getResponse().getStatus();
+		Assert.assertEquals(200, status);
+	}
+
+	@Test
+	@Order(6)
+	void testGetClienteByIdNotFound() throws Exception {
+		final var mvcResult = this.mvc.perform(get(PATH + "/id/0").contentType(MediaType.APPLICATION_JSON_VALUE)
+				.accept(MediaType.APPLICATION_JSON_VALUE)).andReturn();
+		final var status = mvcResult.getResponse().getStatus();
+		Assert.assertEquals(404, status);
+	}
+
+	@Test
+	@Order(7)
 	void testUpdateCliente() throws Exception {
 		Cliente otroCliente = new Cliente("jortiz", "John Ortiz", "jortiz@gmail.com", 3219876543L,
 				LocalDate.parse("2019-05-01"), LocalDate.parse("2019-06-30"), LocalDate.parse("2019-05-20"));
@@ -165,7 +183,24 @@ class TestClienteController {
 	}
 
 	@Test
-	@Order(6)
+	@Order(8)
+	void testErrorUpdateCliente() throws Exception {
+		Cliente otroCliente = new Cliente("jortiz", "John Ortiz", "jortiz@gmail.com", 3219876543L,
+				LocalDate.parse("2019-05-01"), LocalDate.parse("2019-06-30"), LocalDate.parse("2019-05-20"));
+		this.mapper.registerModule(new JavaTimeModule());
+		this.mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+		final var mvcResult = this.mvc
+				.perform(put(PATH + "/0").contentType(MediaType.APPLICATION_FORM_URLENCODED)
+						.content(this.mapper.writeValueAsString(otroCliente))
+						.contentType(MediaType.APPLICATION_JSON_VALUE).accept(MediaType.APPLICATION_JSON_VALUE))
+				.andReturn();
+		final var status = mvcResult.getResponse().getStatus();
+		Assert.assertEquals(404, status);
+
+	}
+
+	@Test
+	@Order(9)
 	void testDeleteCliente() throws Exception {
 		final var mvcResult = this.mvc.perform(delete(PATH + "/9")).andReturn();
 		final var status = mvcResult.getResponse().getStatus();
@@ -173,7 +208,7 @@ class TestClienteController {
 	}
 
 	@Test
-	@Order(7)
+	@Order(10)
 	void testGetClienteEmpty() throws Exception {
 		this.mvc.perform(delete(PATH + "/9"));
 		this.mvc.perform(delete(PATH + "/8"));
@@ -195,7 +230,7 @@ class TestClienteController {
 	}
 
 	@Test
-	@Order(8)
+	@Order(11)
 	void testCreateCliente() throws Exception {
 		Cliente otroCliente = new Cliente(1L, "jortiz", "John Ortiz", "jortiz@gmail.com", 3219876543L,
 				LocalDate.parse("2019-05-01"), LocalDate.parse("2019-06-30"), LocalDate.parse("2019-05-20"));
@@ -214,7 +249,6 @@ class TestClienteController {
 		Assert.assertTrue(content.contains("jortiz@gmail.com"));
 		Assert.assertTrue(content.contains("2019-05-01"));
 		Assert.assertTrue(content.contains("2019-06-30"));
-		Assert.assertTrue(content.contains("2019-05-20"));
 	}
 
 }
