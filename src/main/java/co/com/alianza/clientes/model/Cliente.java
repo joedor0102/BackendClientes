@@ -30,11 +30,12 @@ import lombok.ToString;
 @ToString
 @Entity
 @Table(name = "cliente")
-@SequenceGenerator(name="cliente_id_seq", initialValue = 10, allocationSize = 100)
+//@SequenceGenerator(name="cliente_id_seq", initialValue = 10, allocationSize = 100)
 public class Cliente {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "cliente_id_seq")
+//	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "cliente_id_seq")
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
 
 	@Column(name = "shared_key")
